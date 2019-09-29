@@ -1,19 +1,25 @@
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from helper import gridplots, grid_labels, img_path
+from helper import gridplots, grid_labels, img_path, script_path
 import tikzplotlib
 
+mpl.use("pgf")
 mpl.rcdefaults()
+fname = (script_path / "helper" / "matplotlibrc").as_posix()
+mpl.rc_file(fname)
+print(mpl.rcParams)
+# print(rc)
 
-pgf_dict = {"font.family": "sans-serif",
-            "font.serif": [],                    # use latex default serif font
-            "font.sans-serif": [],
-            "pgf.rcfonts": False,
+# pgf_dict = {"font.family": "sans-serif",
+            # "font.serif": [],                    # use latex default serif font
+            # "font.sans-serif": [],
+            # "pgf.rcfonts": False,
             # "legend.frameon": False,
-            "figure.constrained_layout.use": True}
+            # ""
+            # "figure.constrained_layout.use": True}
 
-mpl.rcParams.update(**pgf_dict)
+# mpl.rcParams.update(**rc)
 
 
 def main():
@@ -31,7 +37,8 @@ def main():
     for i, ax_ in enumerate(ax[: -1]):
         y = functions[i](x)
         y[np.abs(y) > 10] = np.nan
-        ax_.plot(x, y, "o", markersize=2,
+        ax_.plot(x, y, "o",
+                 # markersize=2,
                  label="$y=\\{0}(x)$".format(func_names[i]))
         ax_.set_xlabel("$x$")
         ax_.set_ylabel("$y$")
@@ -50,6 +57,7 @@ def main():
     # fig.set_constrained_layout(False)
     # ax[-1].set_axis_off()
     fig.savefig(img_path / "example2.pgf")
+    fig.savefig(img_path / "example2.pdf")
     tikzplotlib.save(img_path / "example2.tex")
 
 
