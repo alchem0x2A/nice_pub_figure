@@ -1,0 +1,2 @@
+TEX_PATH=
+IMG_PATH=
