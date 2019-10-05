@@ -1,0 +1,214 @@
+% Settings for TeXShop
+
+%!TEX TS-program = lualatex
+%!TEX encoding = UTF-8 Unicode
+
+\input{header}
+% \usepackage{lua-visual-debug}
+% \usepackage{tikz}
+% \usepackage{pgfplots}
+
+
+\title{Sample Article}
+\author{John Snow}
+% \date{}                                           % Activate to display a given date or no date
+\newcommand*{\mpl}{\texttt{Matplotlib}\xspace}
+\newcommand*{\ink}{\texttt{Inkscape}\xspace}
+\newcommand*{\py}{\texttt{Python}\xspace}
+
+\begin{document}
+\maketitle
+
+\doublespacing
+
+
+\section{Short Description}
+\label{sec:usage}
+
+This is a template project that generates figures with publication
+standard using \LaTeXe{}, \mpl and \ink. The idea is to generate
+figure and subplot layout using \py, with minimal manual tweaking of
+parameters.
+
+The desired appearance of figures output by this package is:
+\begin{itemize}
+\item Color and data management by \py{} + \mpl{}
+\item Font style and size controlled by \LaTeX{} typesetting
+\item Figure size automatically detected by \mpl{} using the current \LaTeX{} style
+\end{itemize}
+
+There are also other aesthetic considerations:
+\begin{itemize}
+\item Minimize the number of font sizes used in a single figure
+\item Use all \texttt{sans serif} fonts inside the figure for both annotation \& math
+\item Automatic labeling subfigures according to the convention of journal publications
+\end{itemize}
+
+The following sections describes the basic usage of the repository. 
+
+\section{Layout of directory}
+\label{sec:layout-directory}
+
+The \py{} codes to generate a multi-panel figure depends heavily on
+the \LaTeX{} preamble and \texttt{matplotlibrc} settings, therefore, I
+prefer to put the configuration scripts together with the plotting
+scripts, instead of shipping an stand-alone \py{} package.
+
+The \LaTeX{} files are usually placed on the root of the repository,
+while the \py{} scripts and image files are places under separate
+sub-folders. A typical layout can be:
+\vspace{1em}
+\dirtree{%
+  .1 / \DTcomment{Root for main \LaTeX{} files}.
+  .2 main.tex \DTcomment{Main \LaTeX{} file}.
+  .2 .test.tex \DTcomment{Minimal \LaTeX{} file to detect page geometry}.
+  .2 header.tex \DTcomment{Common preamble for \LaTeX{} files}.
+  .2 preamble\_plot.tex \DTcomment{\textit{Optional} preambles for \mpl{} plots}.
+  .2 scripts \DTcomment{\py{} scripts}. 
+  .3 helper \DTcomment{Helper module for making plots}.
+  .3 plot\_xx \DTcomment{Scripts for plotting}.
+  .2 img \DTcomment{Directory for \texttt{pgf} image output}.
+  .2 TeX \DTcomment{Directory for additional \LaTeX{} files}.
+}
+
+To use the package, you may need to tweak a little bit on the \py{}
+scripts. The places you may want to look into are:
+\begin{itemize}
+\item \verb|header.tex|: Font settings for main \LaTeX{} file
+\item \verb|preamble_plot.tex|: Font settings for \texttt{pgf} plots
+\item \verb|scripts/helper/tex_helper.py|: Which header and preamble files to look for
+\item \verb|scripts/helper/mpl_helper.py|: If need to use individual preamble for \mpl{} plot
+\end{itemize}
+
+\section{Generating figures using \texttt{Matplotlib} alone}
+\label{sec:matpl-only-figure}
+
+The \py{} scripts inside the \texttt{scripts/} folder needed to be
+executed as packages, such as:
+\begin{verbatim}
+python -m plot_xx.plot_xx_yy
+\end{verbatim}
+if \verb|plot_xx/plot_xx_yy.py| is the script to generate \texttt{pgf}
+plot.
+
+\subsection{Automatic detetion of figure width}
+\label{sec:autom-detet-figure}
+
+To make the figure sizes compatible with the width of document page,
+the \LaTeX{} macro \verb|\textwidth| is detected automatically by
+rendering the \verb|.test.tex| file.
+
+
+{\allowbreak
+  As a result, the relative width of a figure to be generated can be
+calculated using \verb|mpl_helper.relsize(r)|, where \texttt{r} is the
+relative width of the figure (0$\sim{}$1).
+\par}
+
+\subsection{Generating subfigures using relative size}
+\label{sec:gener-subf}
+
+The function \verb|mpl_helper.grid_plots| provides an interface like
+\verb|pyplot.subplots|, while instead providing the full
+\texttt{figsize}, the function uses relative size \texttt{r} and a
+length:height ratio \texttt{ratio} to determine the figure size.
+
+\textbf{Note}: the size of \verb|\textwidth| is given using points. In
+order to convert it into inches that \mpl{} understands, the
+\verb|ppi| value is used. By default \verb|ppi=72|.
+
+Usually in publications, the subfigures are labeled as \textbf{a},
+\textbf{b}, \textbf{c}, $\dots$. This is achieved using
+\verb|constrained_layout = True| and \verb|Figure.transFigure| in
+\mpl{}. A function \verb|mpl_helper.grid_labels| is provided to add
+text labels to a series of \verb|matplotlib.axes.Axes| subplot axes
+instances. 
+
+\textbf{Note}: the position of the labels are determined using a
+relatively simple algorithm. If the desired layout is not achieved, I
+recommend to do a manual tweaking providing the \verb|offsets|
+parameter to the \verb|mpl_helper.grid_labels| function.
+
+\textbf{Usage}: \verb|helper/__init__.py| wraps up all the helper
+functions \& variables. Therefore, to call the functions inside the
+plot scripts, simply call:
+\begin{verbatim}
+from helper import gridplots, grid_labels
+\end{verbatim}
+
+\autoref{fig:fig1} is a simple example using
+\verb|mpl_helper.grid_plots| to create a plot with 4 sub-panels. The
+base font size in the plot is 10 pt (compared with the 12 pt) used in
+main text. The \texttt{sans serif} font used is \texttt{Fira
+  Sans}. The plot is produced using \verb|example1.py|.
+
+\begin{figure}[htbp]
+  \centering
+  \mathversion{sansmath}
+  \import{img/}{example1.pgf}
+  \caption{Example of figure with 4 sub-panels produced by
+    \texttt{gridplots}.}
+  \label{fig:fig1}
+\end{figure}
+
+\autoref{fig:fig2} extends the example to make a figure with
+unbalanced subfigures. This is achieved by setting \texttt{span}
+parameter in the \texttt{gridplots} function. In addition, the figure
+uses a small manual tweaking to set the position of label
+\textbf{\textsf{d}}. The plot is produced using \verb|example2.py|.
+
+
+\begin{figure}[htbp]
+  \mathversion{sansmath}
+  \centering
+  \import{img/}{example2.pgf}
+  \caption{Example of imbalanced subfigure using sans font}
+  \label{fig:fig2}
+\end{figure}
+
+\autoref{fig:fig2a} shows a practical example usually encountered in
+publication figures: legend shared by two subfigures. In this case,
+the legend is usually moved outside the plots, with the aspect ratio
+of both figures kept the same. The plot is produced using
+\verb|example2a.py|. The position of the legend is set by using both
+the \texttt{bbox\_to\_anchor} and \texttt{loc} keywords. Such case is
+usually necessary when the number of items in the legend is more than
+4 and the text of each item is also long.
+
+\begin{figure}[htbp]
+  \mathversion{sansmath}
+  \centering
+  \import{img/}{example2a.pgf}
+  \caption{Example of subfigure with legend outside}
+  \label{fig:fig2a}
+\end{figure}
+
+\subsection{Mixing subplot with image}
+\label{sec:mixing-subplot-with}
+
+The next sample (~\ref{fig:fig3}) is to mix a line plot with a 2D
+plot. Note the original \texttt{pgf} output from \mpl{} uses
+\verb|\pgfimage| macro, which is not able to track the image input in
+sub-folders. Instead, we should replace it with
+\verb|\includegraphics|. This is done by the helper function
+\verb|savepgf()| inside \verb|mpl_helper.py|.
+
+\begin{figure}[htbp]
+  \mathversion{sansmath}
+  \centering
+  \import{img/}{example3.pgf}
+  \caption{Example of line plot side-by-side with 2D plot}
+  \label{fig:fig3}
+\end{figure}
+
+
+\end{document}  
+% Local Variables:
+% TeX-engine: luatex
+% TeX-master: t
+% End:
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
