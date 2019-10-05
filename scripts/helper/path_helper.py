@@ -16,7 +16,7 @@ root_path = script_path.parent
 
 # Path for img
 img_path = root_path / "img/"
-tex_path = root_path / "TeX"
+tex_path = root_path
 build_path = root_path / "build"
 
 for p_ in [img_path, tex_path, build_path]:

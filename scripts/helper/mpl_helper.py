@@ -5,7 +5,20 @@ from matplotlib.pyplot import figure
 from matplotlib.gridspec import GridSpec as GS
 import numpy as np
 import string
-from .tex_helper import _get_textwidth
+from .tex_helper import _get_textwidth, _get_preamble
+from .path_helper import _module_path
+
+mpl_file = _module_path / "matplotlibrc"
+# Update the rcParams
+mpl.rcdefaults()
+mpl.rc_file(mpl_file.as_posix())
+
+# Load the preamble
+preamble = _get_preamble()
+print(preamble)
+if len(preamble) > 0:
+    mpl.rcParams["pgf.preamble"] = preamble
+
 
 
 _textwidth = _get_textwidth()
@@ -29,7 +42,9 @@ def gridplots(nrows=1, ncols=1, span=[],
     if width is None:           # use automatic detection
         width = _textwidth
     figsize = relsize(r, width, ratio, ppi)
+    print(figsize)
     fig = figure(figsize=figsize)
+    print("Until here!")
     if (span is None) or (span == []) \
        or (ncols == 1 and nrows == 1):
         axs = fig.subplots(nrows, ncols, **args)
