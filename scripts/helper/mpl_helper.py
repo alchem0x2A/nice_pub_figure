@@ -66,7 +66,9 @@ def gridplots(nrows=1, ncols=1, span=[],
 
 def grid_labels(fig, axes, offsets=[],
                 type="latin",
-                decorate="{0}", **args):
+                decorate="{0}",
+                reserved_space=(-0.03, 0.02),  # reserved space for label
+                **args):
     """Put the grid labels in a controlled position. 
        Guess the position
     """
@@ -105,7 +107,19 @@ def grid_labels(fig, axes, offsets=[],
         w_spacings = np.ones(nc) / nc
     else:
         w_spacings = np.array(wr) / nc
-    
+
+    # Add some sacrifice labels to ensure enough space
+    try:
+        dx, dy = reserved_space
+        for i, ax in enumerate(axes.flat):
+            ax.text(x=dx, y=1 + dy,
+                    s=decorate.format(label_(i, type)),
+                    transform=ax.transAxes,
+                    alpha=0
+            )  # Fully transparent?
+    except ValueError:
+        pass
+        
     for i, ax in enumerate(axes.flat):
         nr, nc, ri, rf, ci, cf = ax.get_subplotspec().get_rows_columns()
         print(i, ri, rf, ci, cf)
@@ -127,3 +141,40 @@ def grid_labels(fig, axes, offsets=[],
                       transform=fig.transFigure,
                       **defaults)
     return
+
+def _replace_pgf_cmd(string):
+    import re
+    pattern = r"\\pgfimage"
+    new_pat = r"\\includegraphics"
+    cont = re.sub(pattern, new_pat, string)
+    return cont
+
+def savepgf(fig, out_file, preview=True):
+    """Save fig into pgf file and replace the 
+    \\pdfimage part
+    if preview is True, a pdf version is output at the same directory
+    """
+    out_file = Path(out_file)
+
+    suffix = out_file.suffix
+    if suffix == ".pgf":        # already pgf
+        pgf_f = out_file
+        pdf_f = out_file.with_suffix(".pdf")
+    elif suffix == "":          # name root
+        pgf_f = out_file.with_suffix(".pgf")
+        pdf_f = out_file.with_suffix(".pdf")
+    else:
+        raise NameError("Should either provide a filename or ending with .pgf!")
+
+    if preview:
+        fig.savefig(pdf_f)
+
+    fig.savefig(pgf_f)
+    with open(pgf_f, "r") as f:
+        pgf_content = f.read()
+    if len(pgf_content) == 0:
+        raise FileExistsError("File problem?")
+    pgf_content = _replace_pgf_cmd(pgf_content)
+    with open(pgf_f, "w") as f:
+        f.write(pgf_content)
+        return

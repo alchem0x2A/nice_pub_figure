@@ -443,13 +443,13 @@ figure.frameon : False         ## enable figure frame
                                ## the pyplot interface before emitting a warning.
                                ## If less than one this feature is disabled.
 ## The figure subplot parameters.  All dimensions are a fraction of the
-figure.subplot.left    : 0.05  ## the left side of the subplots of the figure
+figure.subplot.left    : 0.1  ## the left side of the subplots of the figure
 figure.subplot.right   : 0.95    ## the right side of the subplots of the figure
 figure.subplot.bottom  : 0.05   ## the bottom of the subplots of the figure
-figure.subplot.top     : 0.95   ## the top of the subplots of the figure
-figure.subplot.wspace  : 0.0    ## the amount of width reserved for space between subplots,
+figure.subplot.top     : 0.9   ## the top of the subplots of the figure
+figure.subplot.wspace  : 0.05    ## the amount of width reserved for space between subplots,
                                  ## expressed as a fraction of the average axis width
-figure.subplot.hspace  : 0.0    ## the amount of height reserved for space between subplots,
+figure.subplot.hspace  : 0.05    ## the amount of height reserved for space between subplots,
                                  ## expressed as a fraction of the average axis height
 
 ## Figure layout
@@ -529,7 +529,7 @@ path.simplify : True   ## When True, simplify paths by removing "invisible"
 #savefig.facecolor   : white    ## figure facecolor when saving
 #savefig.edgecolor   : white    ## figure edgecolor when saving
 #savefig.format      : png      ## png, ps, pdf, svg
-#savefig.bbox        : standard ## 'tight' or 'standard'.
+savefig.bbox        : tight ## 'tight' or 'standard'.
                                 ## 'tight' is incompatible with pipe-based animation
                                 ## backends but will workd with temporary file based ones:
                                 ## e.g. setting animation.writer to ffmpeg will not work,
