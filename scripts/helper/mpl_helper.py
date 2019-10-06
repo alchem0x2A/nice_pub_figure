@@ -7,6 +7,9 @@ import numpy as np
 import string
 from .tex_helper import _get_textwidth, _get_preamble
 from .path_helper import _module_path
+from .img_helper import _get_pdf_size, _get_img_size, _get_img_type
+from shutil import copy
+import re
 
 mpl_file = _module_path / "matplotlibrc"
 # Update the rcParams
@@ -54,7 +57,8 @@ def gridplots(nrows=1, ncols=1, span=[],
             gs_kw = args["gridspec_kw"]
         except KeyError:
             gs_kw = dict()
-        gs = GS(ncols, nrows, figure=fig, **gs_kw)        # Better way?
+        gs = GS(nrows, ncols, figure=fig, **gs_kw)        # Better way?
+        print(gs)
         axs = []
         r = 0
         c = 0            # counter for row and col
@@ -143,11 +147,39 @@ def grid_labels(fig, axes, offsets=[],
     return
 
 def _replace_pgf_cmd(string):
-    import re
     pattern = r"\\pgfimage"
     new_pat = r"\\includegraphics"
     cont = re.sub(pattern, new_pat, string)
     return cont
+
+def _replace_pgf_img(string, index, new):
+    pattern = r"\\pgftext\[.+?\]\{\\includegraphics\[.+?\]\{(.+?img" \
+               + "{:d}".format(index) + r".png)\}\}"
+    match = re.findall(pattern, string)
+    if len(match) > 0:
+        cont = re.sub(match[0], new, string)
+    return cont
+
+def add_img_ax(ax, fname, index=None):
+    """Higher level function to add a image with fname by default,
+    register the information of fname with the ax
+
+    """
+    fname = Path(fname)
+    f_type = _get_img_type(fname)
+    if f_type == "pdf":
+        w, h = _get_pdf_size(fname)
+    else:
+        w, h = _get_img_size(fname)
+    # w, h are in inches
+    # Create a "fake" image
+    ax.plot([0, w], [0, h], rasterized=True)
+    ax.set_aspect("equal")
+    ax.set_axis_off()
+    ax.is_img = True
+    ax.img_kw = dict(filename=fname,
+                     index=index)
+    return True
 
 def savepgf(fig, out_file, preview=True):
     """Save fig into pgf file and replace the 
@@ -175,6 +207,29 @@ def savepgf(fig, out_file, preview=True):
     if len(pgf_content) == 0:
         raise FileExistsError("File problem?")
     pgf_content = _replace_pgf_cmd(pgf_content)
+
+    # PGF images
+    img_dir = pgf_f.parent
+    imgs = []
+    for ax in fig.get_axes():
+        if hasattr(ax, "is_img"):
+            if getattr(ax, "is_img"):
+                index = ax.img_kw["index"]
+                filename = ax.img_kw["filename"]
+                imgs.append([ax, filename, index])
+
+    # reorder index
+    size = len(imgs)
+    if size > 0:
+        for i in range(size):
+            ax, filename, index = imgs[i]
+            if index is None:   # try to use automatic numbering
+                index = i
+            new_name = filename.name
+            copy(filename, img_dir / new_name)
+            pgf_content = _replace_pgf_img(pgf_content, index, new_name)
+    
     with open(pgf_f, "w") as f:
         f.write(pgf_content)
         return
+    
