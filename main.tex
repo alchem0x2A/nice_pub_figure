@@ -4,7 +4,7 @@
 %!TEX encoding = UTF-8 Unicode
 
 \input{header}
-% \usepackage{lua-visual-debug}
+\usepackage{lua-visual-debug}
 % \usepackage{tikz}
 % \usepackage{pgfplots}
 
@@ -90,6 +90,11 @@ python -m plot_xx.plot_xx_yy
 \end{verbatim}
 if \verb|plot_xx/plot_xx_yy.py| is the script to generate \texttt{pgf}
 plot.
+
+In addition, to fasten the speed of batch rendering of plots, a script
+\verb|run_all.py| is provided. In order for new plotting scripts to
+work, the main plotting function should be called \verb|plot_main()|,
+without any parameters. 
 
 \subsection{Automatic detetion of figure width}
 \label{sec:autom-detet-figure}
@@ -186,12 +191,19 @@ usually necessary when the number of items in the legend is more than
 \subsection{Mixing subplot with image}
 \label{sec:mixing-subplot-with}
 
-The next sample (~\ref{fig:fig3}) is to mix a line plot with a 2D
+The next sample (~\autoref{fig:fig3}) is to mix a line plot with a 2D
 plot. Note the original \texttt{pgf} output from \mpl{} uses
 \verb|\pgfimage| macro, which is not able to track the image input in
 sub-folders. Instead, we should replace it with
 \verb|\includegraphics|. This is done by the helper function
-\verb|savepgf()| inside \verb|mpl_helper.py|.
+\verb|savepgf()| inside \verb|mpl_helper.py|. By default, the built-in
+\mpl{} render engine is also used to output a ``preview'' version of
+pdf file together with the pgf file, in order to accelerate the
+typesetting of figure.
+
+\textbf{Note} please be aware that the \mpl{} engine generates
+different layout than final \LaTeX{}. Therefore a fine tuning on the
+\py{} source code is still needed.
 
 \begin{figure}[htbp]
   \mathversion{sansmath}
@@ -201,6 +213,18 @@ sub-folders. Instead, we should replace it with
   \label{fig:fig3}
 \end{figure}
 
+The trickier part comes when you want to combine a pdf image with a
+line plot, as he original \mpl{} output does not support include such
+files. A workaround is to manually add stuff into the pgf file using
+\verb|\pgftext| and \verb|\includegraphics|.
+
+\begin{figure}[htbp]
+  \mathversion{sansmath}
+  \centering
+  \import{img/}{example4.pgf}
+  \caption{Example showing inserting pdf image into an pgf file output by \mpl{}}
+  \label{fig:fig4}
+\end{figure}
 
 \end{document}  
 % Local Variables:
