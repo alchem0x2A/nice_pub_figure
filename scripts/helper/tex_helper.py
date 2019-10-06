@@ -62,3 +62,11 @@ def _get_textwidth(*arg, **argkw):
         except IndexError:
             return None
 
+def clean_width_cache():
+    import os
+    """Remove the width_file in order to restart calculation"""
+    try:
+        os.unlink(width_file)
+        return True
+    except (OSError, FileNotFoundError):
+        return False

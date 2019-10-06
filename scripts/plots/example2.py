@@ -5,7 +5,7 @@ from helper import gridplots, grid_labels, img_path, script_path
 import tikzplotlib
 
 
-def main():
+def plot_main():
     fig, ax = gridplots(3, 3,
                         r=1,
                         span=[(0, 0, 1, 1), (0, 1, 1, 1), (0, 2, 1, 1),
@@ -52,5 +52,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    plot_main()
 

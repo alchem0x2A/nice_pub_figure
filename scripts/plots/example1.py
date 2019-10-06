@@ -3,7 +3,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from helper import gridplots, grid_labels, img_path
 
-def main():
+def plot_main():
     fig, ax = gridplots(2, 2,
                         r=0.8,
                         ratio=1.3)
@@ -38,5 +38,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    plot_main()
 
