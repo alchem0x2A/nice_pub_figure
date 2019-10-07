@@ -123,7 +123,8 @@ def grid_labels(fig, axes, offsets=[],
             )  # Fully transparent?
     except ValueError:
         pass
-        
+
+    labels = []
     for i, ax in enumerate(axes.flat):
         nr, nc, ri, rf, ci, cf = ax.get_subplotspec().get_rows_columns()
         print(i, ri, rf, ci, cf)
@@ -140,11 +141,12 @@ def grid_labels(fig, axes, offsets=[],
         defaults = dict(size="x-large", weight="bold",
                         ha="left", va="top")
         defaults.update(**args)
-        dummy_ax.text(x=left, y=top,
+        t = dummy_ax.text(x=left, y=top,
                       s=decorate.format(label_(i, type)),
                       transform=fig.transFigure,
                       **defaults)
-    return
+        labels.append(t)
+    return labels
 
 def _replace_pgf_cmd(string):
     pattern = r"\\pgfimage"

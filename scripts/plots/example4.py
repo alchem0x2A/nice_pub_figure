@@ -2,15 +2,14 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from helper import gridplots, grid_labels, img_path, script_path
-from helper import savepgf
-from helper.mpl_helper import add_img_ax
+from helper import savepgf, add_img_ax
 
 
 def plot_main():
     fig, ax = gridplots(1, 2,
-                        r=1,
+                        r=0.8,
                         # gridspec_kw=dict(width_ratios=(1.3, 0.7)),
-                        ratio=2.5)
+                        ratio=2)
     # fig.set_constrained_layout(False)
     # Left panel, use line plot
     
@@ -28,8 +27,12 @@ def plot_main():
     ax_.set_xticks([])
     ax_.set_yticks([])
 
-    grid_labels(fig, ax
+    labels = grid_labels(fig, ax,
+                reserved_space=(0, 0),
+                offsets=[(0.02, -0.06),
+                         (0.03, -0.06)]
     )
+    labels[0].set_color("white")
     # ax[-1].set_axis_off()
     # fig.savefig(img_path / "example3.pgf")
     # fig.tight_layout()
