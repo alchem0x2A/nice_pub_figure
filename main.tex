@@ -4,9 +4,13 @@
 %!TEX encoding = UTF-8 Unicode
 
 \input{header}
-\usepackage{lua-visual-debug}
+% \usepackage{lua-visual-debug}
 % \usepackage{tikz}
 % \usepackage{pgfplots}
+\usepackage{etoolbox}
+\AtBeginEnvironment{picture}{\sffamily\fontsize{10}{12.0}\selectfont\mathversion{sansmath}}
+\AtBeginEnvironment{pgfpicture}{\mathversion{sansmath}}
+
 
 
 \title{Sample Article}
@@ -96,7 +100,7 @@ In addition, to fasten the speed of batch rendering of plots, a script
 work, the main plotting function should be called \verb|plot_main()|,
 without any parameters. 
 
-\subsection{Automatic detetion of figure width}
+\subsection{Automatic detection of figure width}
 \label{sec:autom-detet-figure}
 
 To make the figure sizes compatible with the width of document page,
@@ -149,7 +153,7 @@ main text. The \texttt{sans serif} font used is \texttt{Fira
 
 \begin{figure}[htbp]
   \centering
-  \mathversion{sansmath}
+  % \mathversion{sansmath}
   \import{img/}{example1.pgf}
   \caption{Example of figure with 4 sub-panels produced by
     \texttt{gridplots}.}
@@ -164,7 +168,7 @@ uses a small manual tweaking to set the position of label
 
 
 \begin{figure}[htbp]
-  \mathversion{sansmath}
+  % \mathversion{sansmath}
   \centering
   \import{img/}{example2.pgf}
   \caption{Example of imbalanced subfigure using sans font}
@@ -181,7 +185,7 @@ usually necessary when the number of items in the legend is more than
 4 and the text of each item is also long.
 
 \begin{figure}[htbp]
-  \mathversion{sansmath}
+  % \mathversion{sansmath}
   \centering
   \import{img/}{example2a.pgf}
   \caption{Example of subfigure with legend outside}
@@ -206,7 +210,7 @@ different layout than final \LaTeX{}. Therefore a fine tuning on the
 \py{} source code is still needed.
 
 \begin{figure}[htbp]
-  \mathversion{sansmath}
+  % \mathversion{sansmath}
   \centering
   \import{img/}{example3.pgf}
   \caption{Example of line plot side-by-side with 2D plot}
@@ -216,7 +220,11 @@ different layout than final \LaTeX{}. Therefore a fine tuning on the
 The trickier part comes when you want to combine a pdf image with a
 line plot, as he original \mpl{} output does not support include such
 files. A workaround is to manually add stuff into the pgf file using
-\verb|\pgftext| and \verb|\includegraphics|.
+\verb|\pgftext| and \verb|\includegraphics|. This is automatically
+done using an helper function \verb|add_img_ax|. This automatically
+replaces images using the binary image you use. The \verb|grid_labels|
+method also returns the list of labels so that you can play with the
+coloring, size, etc. 
 
 \begin{figure}[htbp]
   \mathversion{sansmath}
@@ -225,6 +233,56 @@ files. A workaround is to manually add stuff into the pgf file using
   \caption{Example showing inserting pdf image into an pgf file output by \mpl{}}
   \label{fig:fig4}
 \end{figure}
+
+\begin{figure}[htbp]
+  \mathversion{sansmath}
+  \centering
+  \import{img/}{example5.pgf}
+  \caption{Example showing multiple images input, the output
+    is not optimal and potentially \ink{} gives better results.}
+  \label{fig:fig5}
+\end{figure}
+
+\section{Using \ink{} renderer}
+\label{sec:using-ink-render}
+
+The other option is to use the \ink{} renderer with pdf+\LaTeX{}
+output. The consistency is made by ensuring all \texttt{picture} and
+\texttt{pgfpicture} environments will use a \texttt{sans serif} math
+version defined in the preamble. Also we manually define every text
+inside the \texttt{picture} environment to use the same font size and
+\texttt{sans serif} typeface. This is achieved by adding the following
+lines in the preamble:
+
+\begin{verbatim}
+\usepackage{etoolbox}
+\AtBeginEnvironment{picture}{\sffamily\fontsize{10}{12.0}
+\selectfont\mathversion{sansmath}}
+\AtBeginEnvironment{pgfpicture}{\mathversion{sansmath}}
+\end{verbatim}
+Change the fontsize according to your settings. This can also be done
+automatically using \py{} script.
+
+
+\begin{figure}[htbp]
+  % \mathversion{sansmath}
+  \centering
+  \import{img/}{inkscape_test.pdf_tex}
+  \caption{Example using Inkscape pdf+\LaTeX{} renderer. The math
+    equation inside the figure is in \texttt{sans serif} font, but
+    $e^{i \pi} + 1 = 0$ here is in \texttt{serif} math font. You
+    should be able to see that the font size of ``Earth'' is the same
+    as in \autoref{fig:fig5}}
+  \label{fig:fig6}
+
+  
+\end{figure}
+
+
+
+
+
+
 
 \end{document}  
 % Local Variables:
